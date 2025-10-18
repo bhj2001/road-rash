@@ -28,12 +28,13 @@ export const GameCanvas = () => {
           <p className="text-xl text-muted-foreground mb-8">Kick, Punch, and Race to Victory!</p>
           <div className="space-y-4 text-center mb-8 bg-card/50 backdrop-blur-sm p-6 rounded-lg border-2 border-primary/30">
             <p className="text-foreground text-lg font-semibold">Controls:</p>
-            <div className="grid grid-cols-2 gap-4 text-left">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-left">
               <p className="text-foreground">⬅️ ➡️ - Change Lanes</p>
               <p className="text-foreground">⬆️ ⬇️ - Speed Control</p>
-              <p className="text-foreground">Z - Kick Left</p>
-              <p className="text-foreground">X - Kick Right</p>
+              <p className="text-accent font-bold">Z/X - Kick (Legs)</p>
+              <p className="text-secondary font-bold">A/S - Punch (Hands)</p>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">Punches deal more damage but shorter range!</p>
           </div>
           <Button 
             onClick={startGame}
@@ -81,9 +82,10 @@ export const GameCanvas = () => {
               />
             </div>
           </div>
-          <div className="bg-card/80 backdrop-blur-sm p-3 rounded-lg border border-primary/50 text-xs text-muted-foreground">
-            <p>Z/X - Kick Left/Right</p>
-            <p>Arrows - Move</p>
+          <div className="bg-card/80 backdrop-blur-sm p-3 rounded-lg border border-primary/50 text-xs space-y-1">
+            <p className="text-accent">Z/X - Kick (Legs)</p>
+            <p className="text-secondary">A/S - Punch (Hands)</p>
+            <p className="text-muted-foreground">Arrows - Move</p>
           </div>
         </div>
       )}

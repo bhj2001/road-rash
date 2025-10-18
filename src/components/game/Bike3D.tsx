@@ -1,29 +1,30 @@
 import { useRef } from 'react';
 import { Mesh, Group } from 'three';
 import { useFrame } from '@react-three/fiber';
+import { Rider3D } from './Rider3D';
 
 interface Bike3DProps {
   position: [number, number, number];
   color: string;
-  isKicking?: 'left' | 'right' | null;
+  action?: 'kick-left' | 'kick-right' | 'punch-left' | 'punch-right' | null;
   rotation?: number;
 }
 
-export const Bike3D = ({ position, color, isKicking, rotation = 0 }: Bike3DProps) => {
+export const Bike3D = ({ position, color, action, rotation = 0 }: Bike3DProps) => {
   const bikeRef = useRef<Group>(null);
-  const kickOffset = useRef(0);
+  const tiltOffset = useRef(0);
 
   useFrame((state) => {
     if (bikeRef.current) {
-      // Smooth kick animation
-      if (isKicking === 'left') {
-        kickOffset.current = Math.min(kickOffset.current + 0.1, 0.5);
-        bikeRef.current.rotation.z = -kickOffset.current;
-      } else if (isKicking === 'right') {
-        kickOffset.current = Math.min(kickOffset.current + 0.1, 0.5);
-        bikeRef.current.rotation.z = kickOffset.current;
+      // Smooth tilt animation for any action
+      if (action?.includes('left')) {
+        tiltOffset.current = Math.min(tiltOffset.current + 0.1, 0.4);
+        bikeRef.current.rotation.z = -tiltOffset.current;
+      } else if (action?.includes('right')) {
+        tiltOffset.current = Math.min(tiltOffset.current + 0.1, 0.4);
+        bikeRef.current.rotation.z = tiltOffset.current;
       } else {
-        kickOffset.current = Math.max(kickOffset.current - 0.15, 0);
+        tiltOffset.current = Math.max(tiltOffset.current - 0.15, 0);
         bikeRef.current.rotation.z = 0;
       }
       
@@ -119,6 +120,9 @@ export const Bike3D = ({ position, color, isKicking, rotation = 0 }: Bike3DProps
       
       {/* Neon underglow */}
       <pointLight position={[0, -0.1, 0]} intensity={1.5} distance={3} color={color} />
+      
+      {/* Rider */}
+      <Rider3D action={action} color={color} />
     </group>
   );
 };

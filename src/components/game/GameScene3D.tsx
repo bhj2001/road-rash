@@ -33,7 +33,7 @@ export const GameScene3D = ({ onScoreChange, onHealthChange, onGameOver, gameSta
   });
   
   const [opponents, setOpponents] = useState<Biker[]>([]);
-  const [kickState, setKickState] = useState<'left' | 'right' | null>(null);
+  const [playerAction, setPlayerAction] = useState<'kick-left' | 'kick-right' | 'punch-left' | 'punch-right' | null>(null);
   const keys = useRef<Set<string>>(new Set());
   const playerRef = useRef(player);
   const lastSpawn = useRef(Date.now());
@@ -49,15 +49,28 @@ export const GameScene3D = ({ onScoreChange, onHealthChange, onGameOver, gameSta
       
       if (gameState !== 'playing') return;
       
+      // Kicks (legs)
       if (e.key === 'z' || e.key === 'Z') {
-        performKick('left');
-        setKickState('left');
-        setTimeout(() => setKickState(null), 300);
+        performAttack('kick', 'left');
+        setPlayerAction('kick-left');
+        setTimeout(() => setPlayerAction(null), 300);
       }
       if (e.key === 'x' || e.key === 'X') {
-        performKick('right');
-        setKickState('right');
-        setTimeout(() => setKickState(null), 300);
+        performAttack('kick', 'right');
+        setPlayerAction('kick-right');
+        setTimeout(() => setPlayerAction(null), 300);
+      }
+      
+      // Punches (hands)
+      if (e.key === 'a' || e.key === 'A') {
+        performAttack('punch', 'left');
+        setPlayerAction('punch-left');
+        setTimeout(() => setPlayerAction(null), 300);
+      }
+      if (e.key === 's' || e.key === 'S') {
+        performAttack('punch', 'right');
+        setPlayerAction('punch-right');
+        setTimeout(() => setPlayerAction(null), 300);
       }
     };
     
@@ -74,27 +87,30 @@ export const GameScene3D = ({ onScoreChange, onHealthChange, onGameOver, gameSta
     };
   }, [gameState]);
 
-  const performKick = (direction: 'left' | 'right') => {
-    const kickRange = 2;
-    const kickDamage = 25;
+  const performAttack = (type: 'kick' | 'punch', direction: 'left' | 'right') => {
+    const range = type === 'kick' ? 2 : 1.8;
+    const damage = type === 'kick' ? 25 : 35; // Punches deal more damage but shorter range
+    const pushForce = type === 'kick' ? 1.5 : 1.2;
     
     setOpponents(prev => prev.filter(opp => {
       const distance = Math.sqrt(
         Math.pow(opp.x - playerRef.current.x, 2) + 
         Math.pow(opp.z - playerRef.current.z, 2)
       );
-      const isInRange = distance < kickRange;
+      const isInRange = distance < range;
       const correctSide = direction === 'left' ? opp.x < playerRef.current.x : opp.x > playerRef.current.x;
       
       if (isInRange && correctSide && Math.abs(opp.z - playerRef.current.z) < 2) {
-        opp.health -= kickDamage;
+        opp.health -= damage;
         if (opp.health <= 0) {
-          scoreRef.current += 100;
+          scoreRef.current += type === 'punch' ? 150 : 100;
           onScoreChange(scoreRef.current);
           return false;
         }
         // Push opponent away
-        opp.x += direction === 'left' ? -1.5 : 1.5;
+        opp.x += direction === 'left' ? -pushForce : pushForce;
+        // Also push back slightly
+        opp.z += type === 'punch' ? 0.5 : 0.3;
       }
       return true;
     }));
@@ -196,7 +212,7 @@ export const GameScene3D = ({ onScoreChange, onHealthChange, onGameOver, gameSta
           <Bike3D 
             position={[playerRef.current.x, 0, playerRef.current.z]} 
             color={player.color}
-            isKicking={kickState}
+            action={playerAction}
           />
           
           {opponents.map((opp) => (
